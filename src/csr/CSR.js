@@ -24,7 +24,7 @@ export default class CSR {
         logger.verbose('CSR.create config options', configOpts)
 
         try {
-            fs.writeFileSync(configFile, )
+            fs.writeFileSync(configFile, configOpts)
         } catch(err) {
             logger.error(`CSR.create failed writing tmp config file ${configFile}`, err)
             throw err

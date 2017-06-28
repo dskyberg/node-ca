@@ -38,7 +38,7 @@ export function fileExistsSync(path) {
 
 export function isDirectory(path) {
     if (fileExistsSync(path)) {
-        const status = fs.statSync(path)
+        const stats = fs.statSync(path)
         return stats.isDirectory()
     }
 }

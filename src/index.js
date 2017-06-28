@@ -9,6 +9,8 @@ import { getPath, IS_NOT_RESOLVED, createNewDir, readDir, readFile, writeFile,
 import { isSelfSigned } from './utils'
 import CA from './ca/CA.js'
 import Cert from './cert/Cert'
+import CSR from './csr/CSR'
+import RSA from './rsa/RSA'
 
 import packageJson from '../package.json'
 
@@ -131,7 +133,7 @@ function handleCreateCert() {
         {
             type: 'list',
             name: 'signing_ca',
-            message: 'Which CA shold sign this',
+            message: 'Which CA should sign this',
             choices: CAs,
         },
         {
@@ -159,8 +161,157 @@ function handleCreateCert() {
     })
 }
 
-function handleSignCRL() {
-    return Promise.resolve()
+function handleCreatePrivateKey() {
+    return inquirer.prompt([
+        {
+            type: 'input',
+            name: 'options',
+            message: 'Where is the options file?',
+            validate: function (value) {
+                if (fileExistsSync(value)) {
+                    return true
+                }
+                return 'Please enter a valid file';
+            }
+        },
+        {
+            type: 'input',
+            name: 'password',
+            message: 'What is the key password?',
+            default: ''
+        },
+         {
+            type: 'input',
+            name: 'key',
+            message: 'Where do you want to put the key?',
+            default: `${process.cwd()}/key.pem`
+        }
+    ]).then(answers => {
+        const optionsPath = getPath('./', answers.options, IS_NOT_RESOLVED)
+        const options = require(optionsPath)
+        let password
+        if (answers.password !== '') {
+            password = answers.password
+        }
+        const outPath = getPath('./', answers.key, false)
+        const rsa = new RSA()
+        return rsa.create(options, password, outPath)
+        .then(() => {
+            logger.info('Your key file has been generated')
+            return
+        })
+        .catch(err => {
+            // It seems cert generation failed
+            logger.error('Key creation failed')
+        })
+    })
+}
+function handleCreateCSR() {
+    return inquirer.prompt([
+        {
+            type: 'input',
+            name: 'key',
+            message: 'Where is the private key?',
+            validate: function(value) {
+                if (fileExistsSync(value)) {
+                    return true
+                }
+                return 'Please enter a valid file';
+            }
+        },
+        {
+            type: 'input',
+            name: 'password',
+            message: 'What is the key password?',
+            default: ''
+        },
+        {
+            type: 'input',
+            name: 'options',
+            message: 'Where is the options file?',
+            validate: function(value) {
+                if (fileExistsSync(value)) {
+                    return true
+                }
+                return 'Please enter a valid file';
+            }
+        },
+        {
+            type: 'input',
+            name: 'csr',
+            message: 'Where do you want to put the CSR?',
+            default: `${process.cwd()}/csr.pem`
+        }
+    ]).then(answers => {
+        const optionsPath = getPath('./', answers.options, IS_NOT_RESOLVED)
+        const options = require(optionsPath)
+        const keyPath = getPath('./', answers.key, false)
+        let password
+        if (answers.password !== '') {
+            password = answers.password
+        }
+        const outPath = getPath('./', answers.csr, false)
+        const csr = new CSR()
+        return csr.create(options, keyPath, password, outPath)
+        .then(() => {
+            logger.info('Your CSR has been created')
+            return
+        })
+        .catch(err => {
+            // It seems cert generation failed
+            logger.error('Cert creation failed')
+        })
+    })
+}
+
+function handleSignCSR() {
+    return inquirer.prompt([
+        {
+            type: 'input',
+            name: 'csr',
+            message: 'Where is the csr?',
+            validate: function(value) {
+                if (fileExistsSync(value)) {
+                    return true
+                }
+                return 'Please enter a valid file';
+            }
+        },
+        {
+            type: 'list',
+            name: 'signing_ca',
+            message: 'Which CA should sign this',
+            choices: CAs,
+        },
+        {
+            type: 'list',
+            name: 'type',
+            message: 'What type of cert is this',
+            choices: ['ca', 'server', 'user'],
+            default: 1
+        },
+        {
+            type: 'input',
+            name: 'cert',
+            message: 'Where do you want to put the certificate?',
+            default: `${process.cwd()}/cert.pem`
+        }
+    ]).then(answers => {
+        const csrPath = getPath('./', answers.csr, IS_NOT_RESOLVED)
+        const options = {
+            type: answers.type
+        }
+        const outPath = getPath('./', answers.cert, false)
+
+        const signingCaDir = getPath(rootDir, answers.signing_ca)
+        const signingCA = new CA(signingCaDir)
+
+        return signingCA.signCSR(options, csrPath, outPath)
+        .catch(err => {
+            // It seems cert generation failed
+            logger.error('Cert creation failed')
+        })
+    })
 }
 
 function loadCACerts() {
@@ -259,16 +410,22 @@ function cli() {
                 'Create a new CA',
                 'Create a cert and key',
                 'Renew a cert',
-                'Sign a cert request',
+                'Generate a Private Key',
+                'Generate a CSR',
+                'Sign a CSR',
                 'Get CA cert chain',
                 'Quit',
             ],
             filter: (value) => {
                 if (value === 'Create a new CA') return 'create_ca';
                 else if (value === 'Create a cert and key') return 'create_cert';
-                else if (value === 'Sign a cert request') return 'sign_crl';
-                else if (value === 'Get CA cert chain') return 'get_ca_chain';
                 else if (value === 'Renew a cert') return 'renew_cert';
+                else if (value === 'Generate a Private Key') return 'create_key';
+                else if (value === 'Generate a CSR') return 'create_csr';
+                else if (value === 'Sign a CSR') return 'sign_csr';
+                else if (value === 'Get CA cert chain') return 'get_ca_chain';
+
+
                 else return 'quit';
             },
             default: 1,
@@ -291,8 +448,12 @@ function cli() {
                 return handleCreateCa().then(cli)
             } else if (answer.command === 'create_cert') {
                 return handleCreateCert().then(cli)
-            } else if (answer.command === 'sign_cert') {
-                return handleSignCRL().then(cli)
+            } else if (answer.command === 'create_key') {
+                return handleCreatePrivateKey().then(cli)
+            } else if (answer.command === 'create_csr') {
+                return handleCreateCSR().then(cli)
+            } else if (answer.command === 'sign_csr') {
+                return handleSignCSR().then(cli)
             } else if (answer.command === 'get_ca_chain') {
                 return handleGetChain().then(cli)
             } else if (answer.command === 'renew_cert') {

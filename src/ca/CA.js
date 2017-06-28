@@ -83,7 +83,7 @@ export default class CA {
         })
         // Create the certificate
         .then(result => {
-            return this.signCSR(csrFile, options)
+            return this.signCSR(options, csrFile)
             .catch(err => {
                 logger.error('CA.createCertAndKey failed signing CSR', err)
                 throw err
@@ -101,7 +101,7 @@ export default class CA {
         })
     }
 
-    signCSR(csrFile, options) {
+    signCSR(options, csrFile, certFile) {
         // const privateKeyPassword = 'password'
         logger.info(`CA [${this.name}]: creating certificate from CSR `)
         try {
@@ -114,12 +114,12 @@ export default class CA {
             }
 
             // Overrides the default in the cnf
-            if ('days' in options.cert) {
+            if ('cert' in options && 'days' in options.cert) {
                 caOpts['days'] = options.cert.days
             }
 
             // The v3 extensions are determined by cert type
-            if (options.type) {
+            if ('type' in options) {
                 if (options.type === 'ca') {
                     caOpts['extensions'] = 'v3_intermediate_ca'
                 } else if (options.type === 'server') {
@@ -133,6 +133,17 @@ export default class CA {
             return openssl('ca', caOpts)
             .then(buffer => {
                 logger.info(`CA [${this.name}]: certificate created`)
+                if (certFile) {
+                    return writeFile(certFile, buffer)
+                    .then(() => {
+                        logger.debug('CA.signCSR: wrote cert file', certFile)
+                        return certFile
+                    })
+                    .catch(err => {
+                        logger.error('CA.signCSR failed writing cert file', err)
+                        throw err
+                    })
+                }
                 return buffer
             })
             .catch(err => {

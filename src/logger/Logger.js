@@ -53,8 +53,9 @@ export default class Logger {
         if (!all || all === null || all.length === 0) {
             return message
         }
-        all.forEach(part => {str.push(`${part}`)})
-        return all.join(' ')
+        strs.push(message)
+        all.forEach(part => {strs.push(`${part}`)})
+        return strs.join(' ')
     }
 
     log(level, message, ...all) {
