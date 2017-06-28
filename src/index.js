@@ -392,7 +392,10 @@ function handleGetChain() {
 }
 
 function handleRenewCert() {
-    return Promise.resolve()
+    return new Promise((resolve, reject) => {
+        logger.error('Not yet supported!')
+        resolve()
+    })
 }
 
 /**
