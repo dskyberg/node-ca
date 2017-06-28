@@ -83,7 +83,7 @@ these.  You can create your own, and place them anywhere you want.
 ## Running
 Run `yarn start` or `node lib/index.js` to run the app.  You should see the following
 
-![interactive][doc/images/interactive1.png]
+![interactive](doc/images/interactive1.png)
 
 ## Creating CA's
 There are configs for a root CA and an intermediate CA.  Create them in that order.
