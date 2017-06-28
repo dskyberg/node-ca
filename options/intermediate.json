@@ -1,0 +1,17 @@
+{
+    "key": {
+        "alg": "rsa",
+        "size": "4096"
+    },
+    "cert": {
+        "subject": {
+            "C": "US",
+            "ST": "California",
+            "L": "San Francisco",
+            "O": "Confyrm Inc.",
+            "CN": "confyrm-intermediate-ca"
+        }
+    },
+    "type": "ca",
+    "name": "intermediate"
+}

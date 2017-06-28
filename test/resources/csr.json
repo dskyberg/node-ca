@@ -1,0 +1,21 @@
+{
+    "key": {
+        "alg": "rsa",
+        "size": "2048",
+        "dekAlg": "aes128"
+    },
+    "cert": {
+        "subject": {
+            "C": "US",
+            "ST": "California",
+            "L": "San Francisco",
+            "O": "Confyrm Inc.",
+            "CN": "www.confyrm.com"
+        },
+        "extensions": {
+            "subjectAltName": "DNS:www.confyrm.com"
+        }
+    },
+    "type": "server",
+    "name": "www.confyrm.com"
+}

@@ -1,0 +1,105 @@
+# OpenSSL intermediate CA configuration file.
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+# Directory and file locations.
+# DO NOT CHANGE THESE!!
+dir               = __replace_me__
+certs             = $dir/certs
+crl_dir           = $dir/crl
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+RANDFILE          = $dir/private/.rand
+
+# The root key and root certificate.
+private_key       = $dir/private/ca.key.pem
+certificate       = $dir/certs/ca.cert.pem
+
+# For certificate revocation lists.
+crlnumber         = $dir/crlnumber
+crl               = $dir/crl/ca.crl.pem
+crl_extensions    = crl_ext
+default_crl_days  = 30
+
+# SHA-1 is deprecated, so use SHA-256 instead.
+default_md        = sha256
+
+name_opt          = ca_default
+cert_opt          = ca_default
+default_days      = 375
+preserve          = no
+policy            = dn_policy
+unique_subject    = yes
+
+# Allow extensions in the CSR to be copied to the cert.  This allows
+# specifying subjectAltName in the CSR, rather than here.
+copy_extensions   = copy
+
+[ dn_policy ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[ req ]
+default_bits        = 2048
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+# Default to creating server certs
+x509_extensions     = server_cert
+
+[ req_distinguished_name ]
+countryName                     = Country Name (2 letter code)
+countryName_default             = US
+
+stateOrProvinceName             = State or Province Name
+stateOrProvinceName_default     = California
+
+localityName                    = Locality Name
+localityName_default            = San Francisco
+
+organizationName                = Organization Name
+organizationName_default        = Confyrm, Inc
+
+organizationalUnitName          = Organizational Unit Name
+organizationalUnitName_default  =
+
+emailAddress                    = Email Address
+emailAddress_default            =
+
+# No default.  Must be supplied
+commonName                      = Common Name
+
+[ crl_ext ]
+authorityKeyIdentifier=keyid:always
+
+[ ocsp ]
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, digitalSignature
+extendedKeyUsage = critical, OCSPSigning
+
+[ usr_cert ]
+basicConstraints = CA:FALSE
+nsCertType = client, email
+nsComment = "OpenSSL Generated Client Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer
+keyUsage = critical, nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, emailProtection
+
+[ server_cert ]
+basicConstraints = CA:FALSE
+nsCertType = server
+nsComment = "OpenSSL Generated Server Certificate"
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid,issuer:always
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
