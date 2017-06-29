@@ -1,6 +1,6 @@
 {
     "name": "node-ca",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Create and manage an OpenSSL CA",
     "main": "index.js",
     "author": "David Skyberg <david@confyrm.com>",
