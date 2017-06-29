@@ -45,7 +45,7 @@
         "sinon": "^2.3.5"
     },
     "ca": {
-        "dir": "/Users/david/cas",
+        "dir": "cas",
         "logs": "logs"
     }
 }
