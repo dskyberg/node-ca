@@ -56,7 +56,7 @@ export default class CSR {
             })
         })
         .then((result) =>{
-            logger.info('CSR.create generated CSR')
+            logger.info('CSR.create generated CSR', result)
             return result
         })
         .catch(err => {

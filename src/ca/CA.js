@@ -114,7 +114,7 @@ export default class CA {
             }
 
             // Overrides the default in the cnf
-            if ('cert' in options && 'days' in options.cert) {
+            if (options && ('cert' in options) && ('days' in options.cert)) {
                 caOpts['days'] = options.cert.days
             }
 
@@ -152,7 +152,7 @@ export default class CA {
             })
 
         } catch(err) {
-            logger.error('CA.signCSR failed:', err)
+            logger.error('CA.signCSR failed:', this.name, err)
             throw err
         }
     }
@@ -264,7 +264,7 @@ export default class CA {
                     return csr.create(options, keyResult, passin, csrFile)
                     .then(csrResult => {
                         // Return both the key and the cert
-                        return ({key: keyResult, csr: csrResult})
+                        return {key: keyResult, csr: csrResult}
                     })
                     .catch(err => {
                         logger.error('CA.create failed to create csr', err)
@@ -273,6 +273,7 @@ export default class CA {
                 }
             })
             .then(result => {
+                logger.debug('CA.create completed returning result.', result)
                 logger.info(`CA [${this.name}]: Initialization complete`)
                 return result
             })

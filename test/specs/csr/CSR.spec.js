@@ -18,11 +18,11 @@ describe('CSR object', function () {
         const buff = CSR.makeConfig(options)
         const compareBuff = `[ req ]
 default_bits = 2048
-distinguished_name = req_distinguished_name
 string_mask = utf8only
 default_md = sha256
-req_extensions = v3_exts
 prompt = no
+distinguished_name = req_distinguished_name
+req_extensions = v3_exts
 [ req_distinguished_name ]
 C = US
 ST = California

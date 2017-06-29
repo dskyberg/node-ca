@@ -15,6 +15,7 @@ import RSA from './rsa/RSA'
 import packageJson from '../package.json'
 
 import logger from './logger'
+logger.removeConsole()
 logger.addFile(packageJson)
 
 // For incremental process notification
@@ -106,9 +107,10 @@ function handleCreateCa() {
             if(isSelfSigned) {
                 return response
             } else {
+                let signOpts
                 const signingCaDir = getPath(rootDir, answers.signing_ca)
                 const signingCA = new CA(signingCaDir)
-                return signingCA.signCSR(response.csr, options)
+                return signingCA.signCSR(options, response.csr)
                 .then( cert => {
                     // We now have a signed cert from the signing CA.  Give it
                     // back to the new CA for storing.
