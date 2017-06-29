@@ -9,11 +9,16 @@ import { fileExistsSync, isDirectory } from '../utils'
 
 export default class Logger {
     constructor() {
-        winston.remove(winston.transports.Console);
+        this.logFile = null
         winston.level = 'silly'
         this.uiLevel = 'error'
         this.ui = null
     }
+
+    removeConsole() {
+        winston.remove(winston.transports.Console);
+    }
+
     setLogLevel(level) {
         winston.level = level
     }
@@ -22,18 +27,17 @@ export default class Logger {
     }
     addFile(packageJson) {
         try {
-        let logFile
         if ('ca' in packageJson && 'logs' in packageJson.ca) {
-            logFile = path.resolve('./', packageJson.ca.logs, 'node-ca.log')
+            this.logFile = path.resolve('./', packageJson.ca.logs, 'node-ca.log')
         } else {
-            logFile = path.resolve(process.cwd(), 'node-ca.log')
+            this.logFile = path.resolve(process.cwd(), 'node-ca.log')
         }
-        const logDir = path.dirname(logFile)
+        const logDir = path.dirname(this.logFile)
         if (!isDirectory(logDir)) {
             fs.mkdirSync(logDir)
         }
         winston.add(winston.transports.File, {
-            filename: logFile,
+            filename: this.logFile,
             handleExceptions: true,
             humanReadableUnhandledException: true
         });
@@ -61,7 +65,13 @@ export default class Logger {
     log(level, message, ...all) {
         try {
             const txt = this.combineParts(message, all)
-            winston.log(level, txt)
+            if(!this.ui && !this.logFile) {
+                console.log(message, ...all)
+                return
+            }
+            if (this.logFile !== null) {
+                winston.log(level, message, ...all)
+            }
             if (this.ui !== null && level <= this.uiLevel) {
                 this.ui.log.write(message)
             }
