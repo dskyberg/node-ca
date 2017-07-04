@@ -62,8 +62,12 @@ export default class CA {
         const certFile = makeFilename(options, 'cert.pem', certOutFile)
 
         // This is not threadsafe.  Good thing node isn't multi-threaded!
-        const serial = readFileSync(`${this.rootDir}/serial`, 'utf-8')
-        const csrFile = `${this.csrsDir}/${serial}.pem`
+        const serial = readFileSync(`${this.rootDir}/serial`, 'utf-8').trimRight()
+        const csrFile = path.format({
+            dir: this.csrsDir,
+            name: serial,
+            ext: '.pem'
+        })
 
         // Create the private key
         const rsa = new RSA()
